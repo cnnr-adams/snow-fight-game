@@ -24,6 +24,7 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
+
 var camera;
 var cursors;
 var spawnPos;
@@ -39,13 +40,13 @@ var otherPlayers = new Map();
 function create() {
     console.log("CREATE!");
     phaserThis = this;
+
     camera = this.cameras.main;
-
-    walls = this.physics.add.staticGroup();
-
     camera.setZoom(5);
+    walls = this.physics.add.staticGroup();
     player = this.physics.add.sprite(0, 0, 'dude');
     cursors = this.input.keyboard.createCursorKeys();
+
     socket.emit('map', renderMap);
     socket.on('player', function (id, x, y, rot) {
         var thisPlayer = otherPlayers.get(id);
