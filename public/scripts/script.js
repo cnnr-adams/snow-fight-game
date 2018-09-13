@@ -29,12 +29,14 @@ var camera;
 var cursors;
 var spawnPos;
 var player;
+var playerSprite;
 
 var phaserThis;
 function preload() {
     this.load.image('tile', 'resources/tile.png');
     this.load.image('dude', 'resources/dude.png');
     this.load.image('wall', 'resources/wall.png');
+    this.load.image('playercollision', 'resources/playercollision.png');
 }
 var otherPlayers = new Map();
 function create() {
@@ -44,7 +46,8 @@ function create() {
     camera = this.cameras.main;
     camera.setZoom(5);
     walls = this.physics.add.staticGroup();
-    player = this.physics.add.sprite(0, 0, 'dude');
+    player = this.physics.add.sprite(0, 0, 'playercollision');
+    playerSprite = this.add.image(0, 0, 'dude');
     cursors = this.input.keyboard.createCursorKeys();
 
     socket.emit('map', renderMap);
@@ -88,7 +91,10 @@ function update(time, delta) {
     camera.scrollX = player.x - window.innerWidth / 2;
     camera.scrollY = player.y - window.innerHeight / 2;
 
-    player.depth = player.y;
+    playerSprite.x = player.x;
+    playerSprite.y = player.y;
+
+    playerSprite.depth = playerSprite.y;
     timeSinceUpdate += delta;
     if (timeSinceUpdate > updateRate) {
         timeSinceUpdate = 0;
