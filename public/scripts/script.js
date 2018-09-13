@@ -4,7 +4,6 @@ var socket = io('http://localhost:3200');
 socket.on('connect', function () { console.log("Big gay connect") });
 socket.on('player', function (id, x, y, rot) { console.log(id, x, y, rot); });
 socket.emit('player', 2, 3, 5);
-socket.emit('map', renderMap);
 socket.on('disconnect', function () { console.log("Big disconnect") });
 
 
@@ -36,15 +35,18 @@ var phaserThis;
 function preload() {
     this.load.image('tile', 'resources/tile.png');
     this.load.image('dude', 'resources/dude.png');
+    this.load.image('wall', 'resources/placeholder.png');
 }
 
 function create() {
+    console.log("CREATE!");
     phaserThis = this;
     camera = this.cameras.main;
 
     camera.setZoom(5);
     player = this.add.image(0, 0, 'dude');
     cursors = this.input.keyboard.createCursorKeys();
+    socket.emit('map', renderMap);
 }
 
 function update() {
@@ -73,8 +75,15 @@ function render() {
 }
 
 function renderMap(map) {
+    //Wait for load
+    while (!phaserThis);
     map.forEach(item => {
-        var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
+        if (item.type === 'floor') {
+            var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
+        } else if (item.type === 'wall') {
+            var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'wall');
+        }
+
     });
     spawnPos = map[Math.floor(Math.random() * map.length)];
     console.log(spawnPos);

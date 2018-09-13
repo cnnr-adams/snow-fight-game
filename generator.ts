@@ -51,6 +51,7 @@ export default class Generator {
                 break;
             }
         }
+        this.postScriptWalls();
         return this.floorPositions;
     }
 
@@ -156,10 +157,32 @@ export default class Generator {
     private sometimes() {
         return Math.random() < (this.tunnelPercent / 100.0)
     }
+    private postScriptWalls() {
+        this.floorPositions.forEach((pos) => {
+            if (pos.type === 'floor') {
+                const up = new Position(pos.x, pos.y + 1, 'wall');
+                const down = new Position(pos.x, pos.y - 1, 'wall');
+                const left = new Position(pos.x - 1, pos.y, 'wall');
+                const right = new Position(pos.x + 1, pos.y, 'wall');
+                if (!this.contains(up)) {
+                    this.floorPositions.push(up);
+                }
+                if (!this.contains(down)) {
+                    this.floorPositions.push(down);
+                }
+                if (!this.contains(left)) {
+                    this.floorPositions.push(left);
+                }
+                if (!this.contains(right)) {
+                    this.floorPositions.push(right);
+                }
+            }
+        });
+    }
 }
 
 class Position {
-    constructor(public x: number, public y: number) { }
+    constructor(public x: number, public y: number, public type = 'floor') { }
 }
 
 class Rectangle {

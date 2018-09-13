@@ -8,7 +8,7 @@ import * as socketio from 'socket.io';
 const io = socketio(server);
 
 import Generator from './generator';
-const generator = new Generator(800, 600, 20, 20);
+const generator = new Generator(150, 150, 20, 20);
 const map = generator.generate();
 
 server.listen(port, () => {
