@@ -26,20 +26,19 @@ var config = {
 
 var game = new Phaser.Game(config);
 
+var phaserThis;
 function preload() {
     this.load.image('tinytile', 'resources/tinytile.png');
 }
 
 function create() {
-    console.log("gayt");
+    phaserThis = this;
 }
 
 function renderMap(map) {
     console.log(map);
     map.forEach(item => {
-        var tile = this.add.image('tinytile');
-        tile.position.x = item.x;
-        tile.position.y = item.y;
+        var tile = phaserThis.add.image(item.x, item.y, 'tinytile');
     });
 
 }
