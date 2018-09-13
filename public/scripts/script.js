@@ -35,7 +35,7 @@ var phaserThis;
 function preload() {
     this.load.image('tile', 'resources/tile.png');
     this.load.image('dude', 'resources/dude.png');
-    this.load.image('wall', 'resources/placeholder.png');
+    this.load.image('wall', 'resources/wall.png');
 }
 
 function create() {
@@ -43,24 +43,30 @@ function create() {
     phaserThis = this;
     camera = this.cameras.main;
 
+    walls = this.physics.add.staticGroup();
+
     camera.setZoom(5);
-    player = this.add.image(0, 0, 'dude');
+    player = this.physics.add.sprite(0, 0, 'dude');
     cursors = this.input.keyboard.createCursorKeys();
     socket.emit('map', renderMap);
 }
 
 function update() {
     if (cursors.up.isDown) {
-        player.y -= 2;
+        player.setVelocityY(-160);
     }
     else if (cursors.down.isDown) {
-        player.y += 2;
+        player.setVelocityY(160);
+    } else {
+        player.setVelocityY(0);
     }
     if (cursors.left.isDown) {
-        player.x -= 2;
+        player.setVelocityX(-160);
     }
     else if (cursors.right.isDown) {
-        player.x += 2;
+        player.setVelocityX(160);
+    } else {
+        player.setVelocityX(0);
     }
 
     camera.scrollX = player.x - window.innerWidth / 2;
@@ -81,10 +87,12 @@ function renderMap(map) {
         if (item.type === 'floor') {
             var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
         } else if (item.type === 'wall') {
-            var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'wall');
+            var tile = walls.create(item.x * 16, item.y * 16, 'wall');
         }
 
     });
+    //create the collison link
+    phaserThis.physics.add.collider(player, walls);
     spawnPos = map[Math.floor(Math.random() * map.length)];
     console.log(spawnPos);
     player.x = (spawnPos.x * 16)
