@@ -2,10 +2,8 @@ console.log("ah");
 
 var socket = io('http://localhost:3200');
 socket.on('connect', function () { console.log("Big gay connect") });
-socket.on('player', function (id, x, y, rot) { console.log(id, x, y, rot); });
-socket.emit('player', 2, 3, 5);
 socket.on('disconnect', function () { console.log("Big disconnect") });
-
+const updateRate = 30;
 
 var config = {
     type: Phaser.AUTO,
@@ -37,7 +35,7 @@ function preload() {
     this.load.image('dude', 'resources/dude.png');
     this.load.image('wall', 'resources/wall.png');
 }
-
+var otherPlayers = new Map();
 function create() {
     console.log("CREATE!");
     phaserThis = this;
@@ -49,9 +47,26 @@ function create() {
     player = this.physics.add.sprite(0, 0, 'dude');
     cursors = this.input.keyboard.createCursorKeys();
     socket.emit('map', renderMap);
+    socket.on('player', function (id, x, y, rot) {
+        var thisPlayer = otherPlayers.get(id);
+        if (thisPlayer) {
+            thisPlayer.x = x;
+            thisPlayer.y = y;
+        } else {
+            otherPlayers.set(id, phaserThis.add.image(x, y, 'dude'))
+        }
+    });
+    socket.on('playerleave', function (id) {
+        const player = otherPlayers.get(id);
+        if (player) {
+            player.texture.destroy();
+            otherPlayers.delete(id);
+        }
+    });
 }
 
-function update() {
+var timeSinceUpdate = 0;
+function update(time, delta) {
     if (cursors.up.isDown) {
         player.setVelocityY(-160);
     }
@@ -73,6 +88,11 @@ function update() {
     camera.scrollY = player.y - window.innerHeight / 2;
 
     player.depth = player.y;
+    timeSinceUpdate += delta;
+    if (timeSinceUpdate > updateRate) {
+        timeSinceUpdate = 0;
+        socket.emit('player', player.x, player.y, 0);
+    }
 }
 
 function render() {
@@ -94,7 +114,6 @@ function renderMap(map) {
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
     spawnPos = map[Math.floor(Math.random() * map.length)];
-    console.log(spawnPos);
     player.x = (spawnPos.x * 16)
     player.y = (spawnPos.y * 16)
 }

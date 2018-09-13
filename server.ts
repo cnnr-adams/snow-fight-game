@@ -23,9 +23,12 @@ app.use(express.static(__dirname + '/public'));
 
 io.on('connection', function (socket) {
     socket.on('player', (x, y, rot) => {
-        socket.broadcast.emit('player', x, y, rot);
+        socket.broadcast.emit('player', socket.id, x, y, rot);
     });
     socket.on('map', (callback) => {
         callback(map);
+    });
+    socket.on('disconnect', function () {
+        socket.broadcast.emit('playerleave', socket.id);
     });
 });
