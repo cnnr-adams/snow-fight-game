@@ -20,11 +20,13 @@ var config = {
     },
     scene: {
         preload: preload,
-        create: create
+        create: create,
+        update: update
     }
 };
 
 var game = new Phaser.Game(config);
+var camera;
 
 var phaserThis;
 function preload() {
@@ -33,6 +35,12 @@ function preload() {
 
 function create() {
     phaserThis = this;
+    camera = this.cameras.main;
+    console.log(camera);
+}
+
+function update() {
+    camera.y += 1;
 }
 
 function renderMap(map) {
