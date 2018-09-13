@@ -21,32 +21,56 @@ var config = {
     scene: {
         preload: preload,
         create: create,
-        update: update
+        update: update,
+        render: render
     }
 };
 
 var game = new Phaser.Game(config);
 var camera;
+var cursors;
 
 var phaserThis;
 function preload() {
-    this.load.image('tinytile', 'resources/tinytile.png');
+    this.load.image('tile', 'resources/tile.png');
 }
 
 function create() {
     phaserThis = this;
     camera = this.cameras.main;
-    console.log(camera);
+
+    camera.scrollX = 3500;
+    camera.scrollY = 2500;
+
+    camera.setZoom(5);
+    cursors = this.input.keyboard.createCursorKeys();
 }
 
 function update() {
-    camera.y += 1;
+    if (cursors.up.isDown) {
+        camera.scrollY -= 2;
+    }
+    else if (cursors.down.isDown) {
+        camera.scrollY += 2;
+    }
+
+    if (cursors.left.isDown) {
+        camera.scrollX -= 2;
+    }
+    else if (cursors.right.isDown) {
+        camera.scrollX += 2;
+    }
+}
+
+function render() {
+    console.log("gay_");
+    this.debug.cameraInfo(camera, 32, 32);
 }
 
 function renderMap(map) {
     console.log(map);
     map.forEach(item => {
-        var tile = phaserThis.add.image(item.x, item.y, 'tinytile');
+        var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
     });
 
 }
