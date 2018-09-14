@@ -38,7 +38,7 @@ function preload() {
     this.load.image('playercollision', 'resources/playercollision.png');
 }
 var lightAngle = Math.PI / 4;
-var numberOfRays = 100;
+var numberOfRays = 20;
 var rayLength = 50;
 var otherPlayers = new Map();
 function create() {
@@ -139,6 +139,7 @@ function renderMap(map) {
         if (item.type === 'floor') {
             var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
             tiles.push(tile);
+
         } else if (item.type === 'wall') {
             var tile = walls.create(item.x * 16, item.y * 16, 'wall');
             tiles.push(tile);
@@ -146,12 +147,11 @@ function renderMap(map) {
         }
 
     });
-    maskGraphics = phaserThis.add.graphics({ fillStyle: { color: 0xffffff } });
-    maskGraphics.alpha = 0;
+    maskGraphics = phaserThis.add.graphics({ fillStyle: { color: 0xffffe0 } });
+    maskGraphics.alpha = 0.5;
     tiles.forEach(tile => {
         tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
     });
-    console.log(maskGraphics);
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
     spawnPos = map[Math.floor(Math.random() * map.length)];
