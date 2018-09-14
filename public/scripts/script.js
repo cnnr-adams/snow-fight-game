@@ -18,8 +18,7 @@ var config = {
     scene: {
         preload: preload,
         create: create,
-        update: update,
-        render: render
+        update: update
     }
 };
 
@@ -38,6 +37,9 @@ function preload() {
     this.load.image('wall', 'resources/wall.png');
     this.load.image('playercollision', 'resources/playercollision.png');
 }
+var lightAngle = Math.PI / 4;
+var numberOfRays = 100;
+var rayLength = 50;
 var otherPlayers = new Map();
 function create() {
     console.log("CREATE!");
@@ -68,7 +70,6 @@ function create() {
         }
     });
 }
-
 var timeSinceUpdate = 0;
 function update(time, delta) {
     if (cursors.up.isDown) {
@@ -100,27 +101,55 @@ function update(time, delta) {
         timeSinceUpdate = 0;
         socket.emit('player', player.x, player.y, 0);
     }
+
+    if (wallSet !== undefined && maskGraphics) {
+        maskGraphics.clear();
+        var points = [player.x, player.y];
+        var mouseAngle = Math.atan2(player.y - (game.input.mousePointer.y + this.cameras.main.scrollY), player.x - (game.input.mousePointer.x + this.cameras.main.scrollX));
+        for (var i = 0; i < numberOfRays; i++) {
+            var rayAngle = mouseAngle - (lightAngle / 2) + (lightAngle / numberOfRays) * i
+            var lastX = player.x;
+            var lastY = player.y;
+            for (var j = 1; j <= rayLength; j += 1) {
+                var landingX = Math.round(player.x - (2 * j) * Math.cos(rayAngle));
+                var landingY = Math.round(player.y - (2 * j) * Math.sin(rayAngle));
+                if (!wallSet.has(`${Math.round(landingX / 16.0)}-${Math.round(landingY / 16.0)}`)) {
+                    lastX = landingX;
+                    lastY = landingY;
+                }
+                else {
+                    //  console.log(lastX, lastY);
+                    points.push(lastX, lastY);
+                    break;
+                }
+            }
+            points.push(lastX, lastY);
+        }
+        var polygon = new Phaser.Geom.Polygon(points);
+        console.log(points);
+        maskGraphics.fillPoints(polygon.points, true);
+    }
 }
 
-function render() {
-    console.log("gay_");
-    this.debug.cameraInfo(camera, 32, 32);
-}
-
+var maskGraphics;
+var wallSet = new Set();
 function renderMap(map) {
     //Wait for load
-    while (!phaserThis);
     map.forEach(item => {
         if (item.type === 'floor') {
             var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
         } else if (item.type === 'wall') {
             var tile = walls.create(item.x * 16, item.y * 16, 'wall');
+            wallSet.add(`${item.x}-${item.y}`);
         }
 
     });
+    maskGraphics = phaserThis.add.graphics({ fillStyle: { color: 0x0000ff } });
+    console.log(maskGraphics);
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
     spawnPos = map[Math.floor(Math.random() * map.length)];
     player.x = (spawnPos.x * 16)
     player.y = (spawnPos.y * 16)
+
 }
