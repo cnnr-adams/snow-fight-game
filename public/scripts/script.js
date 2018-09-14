@@ -111,9 +111,9 @@ function update(time, delta) {
             var lastX = player.x;
             var lastY = player.y;
             for (var j = 1; j <= rayLength; j += 1) {
-                var landingX = Math.round(player.x - (2 * j) * Math.cos(rayAngle));
-                var landingY = Math.round(player.y - (2 * j) * Math.sin(rayAngle));
-                if (!wallSet.has(`${Math.round(landingX / 16.0)}-${Math.round(landingY / 16.0)}`)) {
+                var landingX = player.x - (2 * j) * Math.cos(rayAngle);
+                var landingY = player.y - (2 * j) * Math.sin(rayAngle);
+                if (!wallSet.has(`${Math.round(landingX / 16)}-${Math.round(landingY / 16)}`)) {
                     lastX = landingX;
                     lastY = landingY;
                 }
@@ -145,7 +145,6 @@ function renderMap(map) {
 
     });
     maskGraphics = phaserThis.add.graphics({ fillStyle: { color: 0x0000ff } });
-    console.log(maskGraphics);
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
     spawnPos = map[Math.floor(Math.random() * map.length)];
