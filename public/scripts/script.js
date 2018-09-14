@@ -29,8 +29,8 @@ var cursors;
 var spawnPos;
 var player;
 var playerSprite;
-
 var phaserThis;
+
 function preload() {
     this.load.image('tile', 'resources/tile.png');
     this.load.image('dude', 'resources/dude.png');
@@ -126,7 +126,6 @@ function update(time, delta) {
             points.push(lastX, lastY);
         }
         var polygon = new Phaser.Geom.Polygon(points);
-        console.log(points);
         maskGraphics.fillPoints(polygon.points, true);
     }
 }
@@ -134,17 +133,24 @@ function update(time, delta) {
 var maskGraphics;
 var wallSet = new Set();
 function renderMap(map) {
+    var tiles = [];
     //Wait for load
     map.forEach(item => {
         if (item.type === 'floor') {
             var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
+            tiles.push(tile);
         } else if (item.type === 'wall') {
             var tile = walls.create(item.x * 16, item.y * 16, 'wall');
+            tiles.push(tile);
             wallSet.add(`${item.x}-${item.y}`);
         }
 
     });
-    maskGraphics = phaserThis.add.graphics({ fillStyle: { color: 0x0000ff } });
+    maskGraphics = phaserThis.add.graphics({ fillStyle: { color: 0xffffff } });
+    maskGraphics.invertAlpha = true;
+    tiles.forEach(tile => {
+        tile.setMask(new Phaser.Display.Masks.BitmapMask(phaserThis, maskGraphics));
+    });
     console.log(maskGraphics);
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
