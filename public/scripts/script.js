@@ -147,9 +147,9 @@ function renderMap(map) {
 
     });
     maskGraphics = phaserThis.add.graphics({ fillStyle: { color: 0xffffff } });
-    maskGraphics.invertAlpha = true;
+    maskGraphics.alpha = 0;
     tiles.forEach(tile => {
-        tile.setMask(new Phaser.Display.Masks.BitmapMask(phaserThis, maskGraphics));
+        tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
     });
     console.log(maskGraphics);
     //create the collison link
