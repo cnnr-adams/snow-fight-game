@@ -164,6 +164,10 @@ export default class Generator {
                 const down = new Position(pos.x, pos.y - 1, 'wall');
                 const left = new Position(pos.x - 1, pos.y, 'wall');
                 const right = new Position(pos.x + 1, pos.y, 'wall');
+                const upLeft = new Position(pos.x - 1, pos.y - 1, 'wall');
+                const upRight = new Position(pos.x + 1, pos.y - 1, 'wall');
+                const downLeft = new Position(pos.x - 1, pos.y + 1, 'wall');
+                const downRight = new Position(pos.x + 1, pos.y + 1, 'wall');
                 if (!this.contains(up)) {
                     this.floorPositions.push(up);
                 }
@@ -175,6 +179,18 @@ export default class Generator {
                 }
                 if (!this.contains(right)) {
                     this.floorPositions.push(right);
+                }
+                if (!this.contains(upLeft)) {
+                    this.floorPositions.push(upLeft);
+                }
+                if (!this.contains(upRight)) {
+                    this.floorPositions.push(upRight);
+                }
+                if (!this.contains(downLeft)) {
+                    this.floorPositions.push(downLeft);
+                }
+                if (!this.contains(downRight)) {
+                    this.floorPositions.push(downRight);
                 }
             }
         });
