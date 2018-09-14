@@ -1,8 +1,8 @@
 console.log("ah");
 
 var socket = io('http://localhost:3200');
-socket.on('connect', function () { console.log("Big gay connect") });
-socket.on('disconnect', function () { console.log("Big disconnect") });
+socket.on('connect', function () { console.log("Connected") });
+socket.on('disconnect', function () { console.log("Disconnected") });
 const updateRate = 30;
 
 var config = {
