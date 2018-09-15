@@ -1,6 +1,4 @@
-console.log("ah");
-
-var socket = io('http://localhost:3200');
+var socket = io(window.location.href);
 socket.on('connect', function () { console.log("Connected") });
 socket.on('disconnect', function () { console.log("Disconnected") });
 const updateRate = 30;
@@ -58,25 +56,38 @@ function create() {
 
     socket.emit('map', renderMap);
     socket.on('player', function (id, x, y, rot) {
+        var d = new Date();
         var thisPlayer = otherPlayers.get(id);
         if (thisPlayer) {
-            thisPlayer.x = x;
-            thisPlayer.y = y;
+            thisPlayer.targetX = x;
+            thisPlayer.targetY = y;
+            thisPlayer.lastTime = thisPlayer.currentTime;
+            thisPlayer.currentTime = d.getTime();
         } else {
-            otherPlayers.set(id, phaserThis.add.image(x, y, 'dude'))
+            console.log(`new player @ ${x},${y}`)
+            otherPlayers.set(id, { targetX: x, targetY: y, lastTime: d.getTime(), currentTime: d.getTime(), image: phaserThis.add.image(x, y, 'dude') })
         }
     });
     socket.on('playerleave', function (id) {
-        const player = otherPlayers.get(id);
+        const otherPlayer = otherPlayers.get(id);
         if (player) {
-            player.texture.destroy();
+            console.log("player deleted.");
+            otherPlayer.image.destroy();
             otherPlayers.delete(id);
         }
     });
 }
-
+var interpSpeed;
 var timeSinceUpdate = 0;
 function update(time, delta) {
+    //Multiplayer interpolation
+    otherPlayers.forEach(otherPlayer => {
+        const updateTime = otherPlayer.currentTime - otherPlayer.lastTime;
+        if (updateTime / delta !== 0) {
+            otherPlayer.image.x = otherPlayer.image.x + (otherPlayer.targetX - otherPlayer.image.x) / (updateTime / delta);
+            otherPlayer.image.y = otherPlayer.image.y + (otherPlayer.targetY - otherPlayer.image.y) / (updateTime / delta);
+        }
+    })
     if (cursors.up.isDown) {
         player.setVelocityY(-160);
     }
