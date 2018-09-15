@@ -124,6 +124,17 @@ export default class Generator {
             return false;
         });
     }
+    private get(c: Position): Position {
+        let tile: Position;
+        this.floorPositions.some((position: Position) => {
+            if (position.x === c.x && position.y === c.y) {
+                tile = position;
+                return true;
+            }
+            return false;
+        });
+        return tile;
+    }
     private getEdgeDirection(location: Position) {
         const edgeSize = 5;
         let sd = -1;
@@ -194,6 +205,26 @@ export default class Generator {
                 }
             }
         });
+    }
+    createTileMap(): Array<Array<number>> {
+        const arr: Array<Array<number>> = new Array();
+        for (let x = 0; x < this.width; x++) {
+            const innerArr = new Array();
+            for (let y = 0; y < this.height; y++) {
+                const tile = this.get(new Position(x, y));
+                if (tile) {
+                    if (tile.type === 'floor') {
+                        innerArr.push(1);
+                    } else if (tile.type === 'floor') {
+                        innerArr.push(2);
+                    }
+                } else {
+                    innerArr.push(0);
+                }
+            }
+            arr.push(innerArr);
+        }
+        return arr;
     }
 }
 

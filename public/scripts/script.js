@@ -149,37 +149,37 @@ function update(time, delta) {
                 // Quadrants need to act differently
                 if (rayAngle >= -Math.PI / 2 && rayAngle < 0) {
                     //x to left, y down
-                    nearestXWall = Math.floor(currentX / 16) * 16;
-                    nearestYWall = Math.ceil(currentY / 16) * 16;
-                    nearestXWall -= nearestXWall === currentX ? 16 : 0;
-                    nearestYWall += nearestYWall === currentY ? 16 : 0;
+                    nearestXWall = Math.floor(currentX / 8) * 8;
+                    nearestYWall = Math.ceil(currentY / 8) * 8;
+                    nearestXWall -= nearestXWall === currentX ? 8 : 0;
+                    nearestYWall += nearestYWall === currentY ? 8 : 0;
 
                     xM = -1;
-                    xS = -1;
+                    xS = -0.001;
                 } else if (rayAngle >= Math.PI / 2 && rayAngle < Math.PI) {
                     //x to right, y up
-                    nearestXWall = Math.ceil(currentX / 16) * 16;
-                    nearestYWall = Math.floor(currentY / 16) * 16;
-                    nearestXWall += nearestXWall === currentX ? 16 : 0;
-                    nearestYWall -= nearestYWall === currentY ? 16 : 0;
+                    nearestXWall = Math.ceil(currentX / 8) * 8;
+                    nearestYWall = Math.floor(currentY / 8) * 8;
+                    nearestXWall += nearestXWall === currentX ? 8 : 0;
+                    nearestYWall -= nearestYWall === currentY ? 8 : 0;
                     yM = -1;
-                    yS = -1;
+                    yS = -0.001;
                 } else if (rayAngle >= 0 && rayAngle < Math.PI / 2) {
                     //x to left, y up
-                    nearestXWall = Math.floor(currentX / 16) * 16;
-                    nearestYWall = Math.floor(currentY / 16) * 16;
-                    nearestXWall -= nearestXWall === currentX ? 16 : 0;
-                    nearestYWall -= nearestYWall === currentY ? 16 : 0;
+                    nearestXWall = Math.floor(currentX / 8) * 8;
+                    nearestYWall = Math.floor(currentY / 8) * 8;
+                    nearestXWall -= nearestXWall === currentX ? 8 : 0;
+                    nearestYWall -= nearestYWall === currentY ? 8 : 0;
                     xM = -1;
                     yM = -1;
-                    xS = -1;
-                    yS = -1;
+                    xS = -0.001;
+                    yS = -0.001;
                 } else {
                     //x to right, y down
-                    nearestXWall = Math.ceil(currentX / 16) * 16;
-                    nearestYWall = Math.ceil(currentY / 16) * 16;
-                    nearestXWall += nearestXWall === currentX ? 16 : 0;
-                    nearestYWall += nearestYWall === currentY ? 16 : 0;
+                    nearestXWall = Math.ceil(currentX / 8) * 8;
+                    nearestYWall = Math.ceil(currentY / 8) * 8;
+                    nearestXWall += nearestXWall === currentX ? 8 : 0;
+                    nearestYWall += nearestYWall === currentY ? 8 : 0;
                 }
 
                 // Distance to y edge vs x edge
@@ -195,7 +195,7 @@ function update(time, delta) {
                     currentX += yDistance * xRatio * yM;
                 }
                 currentDistance = Math.hypot(currentX - player.x, currentY - player.y);
-                if (wallSet.has(`${Math.floor((currentX + xS) / 16)}-${Math.floor((currentY + yS) / 16)}`)) {
+                if (wallSet.has(`${Math.round((currentX + xS) / 16)}-${Math.round((currentY + yS) / 16)}`)) {
                     if (currentDistance > rayLength) {
                         //hypot: raylength, close = hcos(theta), far = hsin(theta)
                         currentX = player.x - rayLength * Math.cos(rayAngle);
@@ -236,12 +236,10 @@ function renderMap(map) {
     map.forEach(item => {
         if (item.type === 'floor') {
             var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
-            tile.setOrigin(0, 0)
             tiles.push(tile);
 
         } else if (item.type === 'wall') {
             var tile = walls.create(item.x * 16, item.y * 16, 'wall');
-            tile.setOrigin(0, 0)
             tiles.push(tile);
             wallSet.add(`${item.x}-${item.y}`);
         }
