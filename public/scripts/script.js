@@ -238,17 +238,17 @@ function renderMap(map) {
 
     var tiles = [];
     //Wait for load
-    map.forEach(item => {
-        if (item.type === 'floor') {
-            var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'empty16');
-            tiles.push(tile);
-
-        } else if (item.type === 'wall') {
-            var tile = walls.create(item.x * 16, item.y * 16, 'empty16');
-            tiles.push(tile);
-            wallSet.add(`${item.x}-${item.y}`);
-        }
-
+    map.forEach((arr, y) => {
+        arr.forEach((item, x) => {
+            if (item === 1) {
+                var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'empty16');
+                tiles.push(tile);
+            } else if (item === 2) {
+                var tile = walls.create(x * 16, y * 16, 'empty16');
+                tiles.push(tile);
+                wallSet.add(`${x}-${y}`);
+            }
+        });
     });
     maskGraphics = phaserThis.add.graphics({ lineStyle: { width: 0.5, color: 0xaa00aa } });
     maskGraphics.alpha = 0.8;
@@ -257,11 +257,12 @@ function renderMap(map) {
     //});
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
-    //do {
-    //    spawnPos = map[Math.floor(Math.random() * map.length)];
-    //} while (spawnPos.type === 'wall');
-
-    //player.x = (spawnPos.x * 16)
-    //player.y = (spawnPos.y * 16)
+    do {
+        var y = Math.floor(Math.random() * map.length);
+        var x = Math.floor(Math.random() * map[y].length);
+        spawnPos = { x: x, y: y };
+    } while (map[y][x] !== 1);
+    player.x = (spawnPos.x * 16)
+    player.y = (spawnPos.y * 16)
 
 }
