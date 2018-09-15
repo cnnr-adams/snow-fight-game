@@ -55,7 +55,6 @@ function create() {
     socket.emit('map', renderMap);
     socket.on('player', function (id, x, y, rot) {
         var d = new Date();
-        console.log("player");
         var thisPlayer = otherPlayers.get(id);
         if (thisPlayer) {
             thisPlayer.targetX = x;
@@ -63,14 +62,15 @@ function create() {
             thisPlayer.lastTime = thisPlayer.currentTime;
             thisPlayer.currentTime = d.getTime();
         } else {
+            console.log(`new player @ ${x},${y}`)
             otherPlayers.set(id, { targetX: x, targetY: y, lastTime: d.getTime(), currentTime: d.getTime(), image: phaserThis.add.image(x, y, 'dude') })
         }
     });
     socket.on('playerleave', function (id) {
-        const player = otherPlayers.get(id);
+        const otherPlayer = otherPlayers.get(id);
         if (player) {
             console.log("player deleted.");
-            // player.texture.destroy();
+            otherPlayer.image.destroy();
             otherPlayers.delete(id);
         }
     });
@@ -81,9 +81,10 @@ function update(time, delta) {
     //Multiplayer interpolation
     otherPlayers.forEach(otherPlayer => {
         const updateTime = otherPlayer.currentTime - otherPlayer.lastTime;
-        console.log(updateTime, delta);
-        otherPlayer.image.x = otherPlayer.image.x + (otherPlayer.targetX - otherPlayer.image.x) / (updateTime / delta);
-        otherPlayer.image.y = otherPlayer.image.y + (otherPlayer.targetY - otherPlayer.image.y) / (updateTime / delta);
+        if (updateTime / delta !== 0) {
+            otherPlayer.image.x = otherPlayer.image.x + (otherPlayer.targetX - otherPlayer.image.x) / (updateTime / delta);
+            otherPlayer.image.y = otherPlayer.image.y + (otherPlayer.targetY - otherPlayer.image.y) / (updateTime / delta);
+        }
     })
     if (cursors.up.isDown) {
         player.setVelocityY(-160);
