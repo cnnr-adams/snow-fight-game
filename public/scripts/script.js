@@ -1,6 +1,6 @@
 console.log("ah");
 
-var socket = io('http://localhost:3200');
+var socket = io(window.location.href);
 socket.on('connect', function () { console.log("Connected") });
 socket.on('disconnect', function () { console.log("Disconnected") });
 const updateRate = 30;
