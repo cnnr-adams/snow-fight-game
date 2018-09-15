@@ -7,6 +7,7 @@ const updateRate = 30;
 
 var config = {
     type: Phaser.AUTO,
+    pixelArt: true,
     width: window.innerWidth,
     height: window.innerHeight,
     physics: {
@@ -32,6 +33,7 @@ var playerSprite;
 var phaserThis;
 
 function preload() {
+    this.load.image('tile_sheet', 'resources/tile_sheet.png');
     this.load.image('tile', 'resources/tile.png');
     this.load.image('dude', 'resources/dude.png');
     this.load.image('wall', 'resources/wall.png');
@@ -227,6 +229,8 @@ function toRadians(angle) {
 var maskGraphics;
 var wallSet = new Set();
 function renderMap(map) {
+    var tileMap = this.make.tilemap({ data: level, tileWidth: 16, tileHeight: 16, });
+
     var tiles = [];
     //Wait for load
     map.forEach(item => {
@@ -246,7 +250,7 @@ function renderMap(map) {
     maskGraphics = phaserThis.add.graphics({ lineStyle: { width: 0.5, color: 0xaa00aa } });
     maskGraphics.alpha = 0.8;
     tiles.forEach(tile => {
-        //    tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
+        tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
     });
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
