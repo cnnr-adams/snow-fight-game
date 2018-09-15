@@ -34,11 +34,8 @@ var phaserThis;
 
 function preload() {
     this.load.image('tile_sheet', 'resources/tile_sheet.png');
-    this.load.image('tile', 'resources/tile.png');
     this.load.image('dude', 'resources/dude.png');
-    this.load.image('wall', 'resources/wall.png');
     this.load.image('playercollision', 'resources/playercollision.png');
-    this.load.image('empty16', 'resources/empty16.png');
 }
 var lightAngle = Math.PI / 4;
 var numberOfRays = 100;
@@ -233,30 +230,29 @@ function renderMap(map) {
     console.log(map);
     var tileMap = phaserThis.make.tilemap({ data: map, tileWidth: 16, tileHeight: 16 });
     var tileSet = tileMap.addTilesetImage('tile_sheet');
-    var layer = tileMap.createStaticLayer(0, tileSet, 0, 0);
-
+    var layer = tileMap.createDynamicLayer(0, tileSet, -8, -8);
+    //collision for player
+    layer.setCollision(2);
 
     var tiles = [];
     //Wait for load
     map.forEach((arr, y) => {
         arr.forEach((item, x) => {
-            if (item === 1) {
-                var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'empty16');
-                tiles.push(tile);
-            } else if (item === 2) {
-                var tile = walls.create(x * 16, y * 16, 'empty16');
-                tiles.push(tile);
+            if (item === 2) {
+                //define loaction of walls
                 wallSet.add(`${x}-${y}`);
             }
         });
     });
     maskGraphics = phaserThis.add.graphics({ lineStyle: { width: 0.5, color: 0xaa00aa } });
-    maskGraphics.alpha = 0.8;
+    maskGraphics.alpha = 1;
+    console.log(layer);
+    //layer.setMask(new Phaser.Display.Masks.BitmapMask(phaserThis, maskGraphics));
     //tiles.forEach(tile => {
     //     tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
     //});
     //create the collison link
-    phaserThis.physics.add.collider(player, walls);
+    phaserThis.physics.add.collider(player, layer);
     do {
         var y = Math.floor(Math.random() * map.length);
         var x = Math.floor(Math.random() * map[y].length);
