@@ -215,7 +215,7 @@ export default class Generator {
                 if (tile) {
                     if (tile.type === 'floor') {
                         innerArr.push(1);
-                    } else if (tile.type === 'floor') {
+                    } else if (tile.type === 'wall') {
                         innerArr.push(2);
                     }
                 } else {

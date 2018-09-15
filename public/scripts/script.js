@@ -38,6 +38,7 @@ function preload() {
     this.load.image('dude', 'resources/dude.png');
     this.load.image('wall', 'resources/wall.png');
     this.load.image('playercollision', 'resources/playercollision.png');
+    this.load.image('empty16', 'resources/empty16.png');
 }
 var lightAngle = Math.PI / 4;
 var numberOfRays = 100;
@@ -229,17 +230,21 @@ function toRadians(angle) {
 var maskGraphics;
 var wallSet = new Set();
 function renderMap(map) {
-    var tileMap = this.make.tilemap({ data: level, tileWidth: 16, tileHeight: 16, });
+    console.log(map);
+    var tileMap = phaserThis.make.tilemap({ data: map, tileWidth: 16, tileHeight: 16 });
+    var tileSet = tileMap.addTilesetImage('tile_sheet');
+    var layer = tileMap.createStaticLayer(0, tileSet, 0, 0);
+
 
     var tiles = [];
     //Wait for load
     map.forEach(item => {
         if (item.type === 'floor') {
-            var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
+            var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'empty16');
             tiles.push(tile);
 
         } else if (item.type === 'wall') {
-            var tile = walls.create(item.x * 16, item.y * 16, 'wall');
+            var tile = walls.create(item.x * 16, item.y * 16, 'empty16');
             tiles.push(tile);
             wallSet.add(`${item.x}-${item.y}`);
         }
@@ -247,16 +252,16 @@ function renderMap(map) {
     });
     maskGraphics = phaserThis.add.graphics({ lineStyle: { width: 0.5, color: 0xaa00aa } });
     maskGraphics.alpha = 0.8;
-    tiles.forEach(tile => {
-        tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
-    });
+    //tiles.forEach(tile => {
+    //     tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
+    //});
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
-    do {
-        spawnPos = map[Math.floor(Math.random() * map.length)];
-    } while (spawnPos.type === 'wall');
+    //do {
+    //    spawnPos = map[Math.floor(Math.random() * map.length)];
+    //} while (spawnPos.type === 'wall');
 
-    player.x = (spawnPos.x * 16)
-    player.y = (spawnPos.y * 16)
+    //player.x = (spawnPos.x * 16)
+    //player.y = (spawnPos.y * 16)
 
 }
