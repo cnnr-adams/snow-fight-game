@@ -6,7 +6,8 @@ socket.on('disconnect', function () { console.log("Disconnected") });
 const updateRate = 30;
 
 var config = {
-    type: Phaser.AUTO,
+    type: Phaser.CANVAS,
+    backgroundColor: (0x000000),
     pixelArt: true,
     width: window.innerWidth,
     height: window.innerHeight,
@@ -23,6 +24,8 @@ var config = {
     }
 };
 
+const tileSize = 16;
+
 var game = new Phaser.Game(config);
 
 var camera;
@@ -35,6 +38,7 @@ var phaserThis;
 function preload() {
     this.load.image('tile_sheet', 'resources/tile_sheet.png');
     this.load.image('dude', 'resources/dude.png');
+    this.load.image('empty16', 'resources/empty16.png');
     this.load.image('playercollision', 'resources/playercollision.png');
 }
 var lightAngle = Math.PI / 4;
@@ -193,7 +197,7 @@ function update(time, delta) {
                     currentX += yDistance * xRatio * yM;
                 }
                 currentDistance = Math.hypot(currentX - player.x, currentY - player.y);
-                if (wallSet.has(`${Math.round((currentX + xS) / 16)}-${Math.round((currentY + yS) / 16)}`)) {
+                if (wallSet.has(`${Math.round((currentX + xS) / tileSize)}-${Math.round((currentY + yS) / tileSize)}`)) {
                     if (currentDistance > rayLength) {
                         //hypot: raylength, close = hcos(theta), far = hsin(theta)
                         currentX = player.x - rayLength * Math.cos(rayAngle);
@@ -226,39 +230,86 @@ function toRadians(angle) {
 
 var maskGraphics;
 var wallSet = new Set();
-function renderMap(map) {
+
+//canvas for image export
+var canvas = document.getElementById('gen_canvas'),
+    context = canvas.getContext('2d');
+
+async function renderMap(map) {
+    canvas.width = map.length * tileSize;
+    canvas.height = map.length * tileSize;
     console.log(map);
-    var tileMap = phaserThis.make.tilemap({ data: map, tileWidth: 16, tileHeight: 16 });
-    var tileSet = tileMap.addTilesetImage('tile_sheet');
-    var layer = tileMap.createDynamicLayer(0, tileSet, -8, -8);
+    //var tileMap = phaserThis.make.tilemap({ data: map, tileWidth: tileSize, tileHeight: tileSize });
+    //var tileSet = tileMap.addTilesetImage('tile_sheet');
+    //var layer = tileMap.createDynamicLayer(0, tileSet, -8, -8);
     //collision for player
-    layer.setCollision(2);
+    //layer.setCollision(2);
 
     var tiles = [];
     //Wait for load
+    console.log("Generating tilemap canvas...");
     map.forEach((arr, y) => {
         arr.forEach((item, x) => {
-            if (item === 2) {
+            if (item === 0) {
+                //add to canvas
+                tilee = new Image();
+                tilee.src = 'resources/tile_empty.png';
+                tilee.onload = function () {
+                    context.drawImage(tilee, x * tileSize, y * tileSize);
+                }
+            }
+            else if (item === 1) {
+                //add to canvas
+                tile = new Image();
+                tile.src = 'resources/tile.png';
+                tile.onload = function () {
+                    context.drawImage(tile, x * tileSize, y * tileSize);
+                }
+            }
+            else if (item === 2) {
+                //add to canvas
+                tilew = new Image();
+                tilew.src = 'resources/wall.png';
+                tilew.onload = function () {
+                    context.drawImage(tilew, x * tileSize, y * tileSize);
+                }
+                var tile = walls.create(x * 16, y * 16, 'empty16');
+                tiles.push(tile);
                 //define loaction of walls
                 wallSet.add(`${x}-${y}`);
             }
         });
     });
     maskGraphics = phaserThis.add.graphics({ lineStyle: { width: 0.5, color: 0xaa00aa } });
-    maskGraphics.alpha = 1;
-    console.log(layer);
-    //layer.setMask(new Phaser.Display.Masks.BitmapMask(phaserThis, maskGraphics));
+    maskGraphics.alpha = 0.2;
+    //oof ouch my testing
+    await sleep(500);
+    var tilemapURI = canvas.toDataURL();
+    console.log(tilemapURI);
+    phaserThis.textures.addBase64('tilemap', tilemapURI);
+    phaserThis.textures.on('onload', function () {
+        var tilemap = phaserThis.add.image(0, 0, 'tilemap')
+        tilemap.setOrigin(0, 0);
+        tilemap.x = -8;
+        tilemap.y = -8;
+        tilemap.depth = -2048;
+        tilemap.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
+    });
     //tiles.forEach(tile => {
     //     tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
     //});
     //create the collison link
-    phaserThis.physics.add.collider(player, layer);
+    phaserThis.physics.add.collider(player, walls);
     do {
         var y = Math.floor(Math.random() * map.length);
         var x = Math.floor(Math.random() * map[y].length);
         spawnPos = { x: x, y: y };
     } while (map[y][x] !== 1);
-    player.x = (spawnPos.x * 16)
-    player.y = (spawnPos.y * 16)
+    player.x = (spawnPos.x * tileSize)
+    player.y = (spawnPos.y * tileSize)
 
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

@@ -9,7 +9,7 @@ const io = socketio(server);
 
 import Generator from './generator';
 console.log("Generating map...");
-const generator = new Generator(150, 150, 20, 20);
+const generator = new Generator(25, 25, 20, 20);
 generator.generate();
 console.log("Map generated, generating simple tilemap..");
 const map = generator.createTileMap();
