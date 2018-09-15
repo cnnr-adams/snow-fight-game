@@ -38,7 +38,7 @@ function preload() {
     this.load.image('playercollision', 'resources/playercollision.png');
 }
 var lightAngle = Math.PI / 4;
-var numberOfRays = 50;
+var numberOfRays = 100;
 var rayLength = 100;
 var otherPlayers = new Map();
 function create() {
@@ -105,42 +105,74 @@ function update(time, delta) {
 
     if (wallSet !== undefined && maskGraphics) {
         maskGraphics.clear();
+
+        // For polygon drawing purposes
         var points = [player.x, player.y];
+
+        // Angle, in radians, of the mouse to the player
         var mouseAngle = Math.atan2(player.y - (game.input.mousePointer.y + this.cameras.main.scrollY), player.x - (game.input.mousePointer.x + this.cameras.main.scrollX));
+
+        // Multiple rays for flashlight effect
         for (var i = 0; i < numberOfRays; i++) {
-            var ray = (180 - toDegrees(mouseAngle - (lightAngle / 2) + (lightAngle / numberOfRays) * i));
-            var rayAngle = ray < 0 ? 360 + ray : ray;
-            const yRatio = Math.tan(toRadians(rayAngle));
+
+            // Angle, in radians, of the ray created
+            var rayAngle = mouseAngle - (lightAngle / 2) + (lightAngle / numberOfRays) * i;
+            rayAngle += rayAngle < -Math.PI ? 2 * Math.PI : 0;
+
+            // Distance y goes for each x and vice versa
+            const yRatio = Math.tan(rayAngle);
             const xRatio = 1 / yRatio;
+
+            // Current ray position, starts at player(can be hand or w/e as well)
             let currentX = player.x;
             let currentY = player.y;
+
+            // Current distance the ray has traveled
             let currentDistance = 0;
+
+            // Until the length is too long
             while (currentDistance < rayLength) {
                 let nearestXWall;
                 let nearestYWall;
-                if (rayAngle >= 0 && rayAngle < 90) {
-                    //  console.log("0", currentX, Math.ceil(currentX / 16) * 16);
-                    //x to right, y up
-                    nearestXWall = Math.ceil(currentX / 16) * 16;
-                    nearestYWall = Math.floor(currentY / 16) * 16;
-                    nearestXWall += nearestXWall === currentX ? 16 : 0;
-                    nearestYWall -= nearestYWall === currentY ? 16 : 0;
-                } else if (rayAngle >= 90 && rayAngle < 180) {
-                    //     console.log("90", currentX, Math.floor(currentX / 16) * 16);
-                    //x to left, y up
-                    nearestXWall = Math.floor(currentX / 16) * 16;
-                    nearestYWall = Math.floor(currentY / 16) * 16;
-                    nearestXWall -= nearestXWall === currentX ? 16 : 0;
-                    nearestYWall -= nearestYWall === currentY ? 16 : 0;
-                } else if (rayAngle >= 180 && rayAngle < 270) {
-                    // console.log("180", currentX, Math.floor(currentX / 16) * 16);
+                let xDistance;
+                let yDistance;
+
+                // Multiplier for direction of travel
+                let yM = 1;
+                let xM = 1;
+                // Shift to round to different tile
+                let xS = 0;
+                let yS = 0;
+
+                // Quadrants need to act differently
+                if (rayAngle >= -Math.PI / 2 && rayAngle < 0) {
                     //x to left, y down
                     nearestXWall = Math.floor(currentX / 16) * 16;
                     nearestYWall = Math.ceil(currentY / 16) * 16;
                     nearestXWall -= nearestXWall === currentX ? 16 : 0;
                     nearestYWall += nearestYWall === currentY ? 16 : 0;
+
+                    xM = -1;
+                    xS = -1;
+                } else if (rayAngle >= Math.PI / 2 && rayAngle < Math.PI) {
+                    //x to right, y up
+                    nearestXWall = Math.ceil(currentX / 16) * 16;
+                    nearestYWall = Math.floor(currentY / 16) * 16;
+                    nearestXWall += nearestXWall === currentX ? 16 : 0;
+                    nearestYWall -= nearestYWall === currentY ? 16 : 0;
+                    yM = -1;
+                    yS = -1;
+                } else if (rayAngle >= 0 && rayAngle < Math.PI / 2) {
+                    //x to left, y up
+                    nearestXWall = Math.floor(currentX / 16) * 16;
+                    nearestYWall = Math.floor(currentY / 16) * 16;
+                    nearestXWall -= nearestXWall === currentX ? 16 : 0;
+                    nearestYWall -= nearestYWall === currentY ? 16 : 0;
+                    xM = -1;
+                    yM = -1;
+                    xS = -1;
+                    yS = -1;
                 } else {
-                    // console.log("270", currentX, Math.ceil(currentX / 16) * 16);
                     //x to right, y down
                     nearestXWall = Math.ceil(currentX / 16) * 16;
                     nearestYWall = Math.ceil(currentY / 16) * 16;
@@ -148,53 +180,43 @@ function update(time, delta) {
                     nearestYWall += nearestYWall === currentY ? 16 : 0;
                 }
 
-                const xDistance = Math.abs(currentX - nearestXWall);
-                const yDistance = Math.abs(currentY - nearestYWall);
+                // Distance to y edge vs x edge
+                xDistance = Math.abs(currentX - nearestXWall);
+                yDistance = Math.abs(currentY - nearestYWall);
 
-                // Essentially calculates inverse time each would take to REACH ((((((((I think))))))))
-                if ((xRatio / xDistance) >= (yRatio / yDistance)) {
+                // Puts the Y distance in terms of x to compare which one is bigger/takes longer
+                if (Math.abs((xDistance)) <= Math.abs((yDistance * xRatio))) {
                     currentX = nearestXWall;
-                    currentY += xDistance * yRatio;
+                    currentY += xDistance * yRatio * xM;
                 } else {
                     currentY = nearestYWall;
-                    currentX += yDistance * xRatio;
+                    currentX += yDistance * xRatio * yM;
                 }
-                // console.log(xDistance, yDistance, currentX, player.x, currentY, player.y)
-                currentDistance = Math.sqrt(Math.pow(currentX - player.x, 2) + Math.pow(currentY - player.y, 2));
+                currentDistance = Math.hypot(currentX - player.x, currentY - player.y);
+                if (wallSet.has(`${Math.floor((currentX + xS) / 16)}-${Math.floor((currentY + yS) / 16)}`)) {
+                    if (currentDistance > rayLength) {
+                        //hypot: raylength, close = hcos(theta), far = hsin(theta)
+                        currentX = player.x - rayLength * Math.cos(rayAngle);
+                        currentY = player.y - rayLength * Math.sin(rayAngle);
+                    }
+                    break;
+                }
                 if (currentDistance > rayLength) {
                     //hypot: raylength, close = hcos(theta), far = hsin(theta)
-                    currentX = rayLength * toDegrees(Math.cos(toRadians(rayAngle)));
-                    currentY = rayLength * toDegrees(Math.sin(toRadians(rayAngle)));
+                    currentX = player.x - rayLength * Math.cos(rayAngle);
+                    currentY = player.y - rayLength * Math.sin(rayAngle);
                 }
             }
             points.push(currentX, currentY);
-
-            /* var lastX = player.x;
-             var lastY = player.y;
-             for (var j = 1; j <= rayLength; j += 0.1) {
-                 var landingX = player.x - (j) * Math.cos(rayAngle);
-                 var landingY = player.y - (j) * Math.sin(rayAngle);
-                 if (!wallSet.has(`${Math.round(landingX / 16)}-${Math.round(landingY / 16)}`)) {
-                     lastX = landingX;
-                     lastY = landingY;
-                 }
-                 else {
-                     //  console.log(lastX, lastY);
-                     points.push(lastX, lastY);
-                     break;
-                 }
-             }*/
-            // points.push(lastX, lastY);
         }
-        // maskGraphics.fillStyle(2, 0xffffff);
-        // var circle = new Phaser.Geom.Circle(player.x, player.y, 20);
-        // maskGraphics.fillCircleShape(circle, true);
+
+        // Creates the flashlight polygon
         var polygon = new Phaser.Geom.Polygon(points);
         maskGraphics.fillStyle(0xffffe0);
         maskGraphics.fillPoints(polygon.points, true);
-
     }
 }
+
 function toDegrees(angle) {
     return angle * (180 / Math.PI);
 }
@@ -210,23 +232,28 @@ function renderMap(map) {
     map.forEach(item => {
         if (item.type === 'floor') {
             var tile = phaserThis.add.image(item.x * 16, item.y * 16, 'tile');
+            tile.setOrigin(0, 0)
             tiles.push(tile);
 
         } else if (item.type === 'wall') {
             var tile = walls.create(item.x * 16, item.y * 16, 'wall');
+            tile.setOrigin(0, 0)
             tiles.push(tile);
             wallSet.add(`${item.x}-${item.y}`);
         }
 
     });
-    maskGraphics = phaserThis.add.graphics({ fillStyle: { color: 0xffffe0 } });
-    maskGraphics.alpha = 0.5;
+    maskGraphics = phaserThis.add.graphics({ lineStyle: { width: 0.5, color: 0xaa00aa } });
+    maskGraphics.alpha = 0.8;
     tiles.forEach(tile => {
-        tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
+        //    tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
     });
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
-    spawnPos = map[Math.floor(Math.random() * map.length)];
+    do {
+        spawnPos = map[Math.floor(Math.random() * map.length)];
+    } while (spawnPos.type === 'wall');
+
     player.x = (spawnPos.x * 16)
     player.y = (spawnPos.y * 16)
 
