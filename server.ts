@@ -8,8 +8,11 @@ import * as socketio from 'socket.io';
 const io = socketio(server);
 
 import Generator from './generator';
+console.log("Generating map...");
 const generator = new Generator(150, 150, 20, 20);
-const map = generator.generate();
+generator.generate();
+console.log("Map generated, generating simple tilemap..");
+const map = generator.createTileMap();
 
 server.listen(port, () => {
     console.log(`Listening on port ${port}`);
