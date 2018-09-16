@@ -242,59 +242,23 @@ function toRadians(angle) {
 var maskGraphics;
 var wallSet = new Set();
 
-//canvas for image export
-//var canvas = document.getElementById('gen_canvas'),
-//    context = canvas.getContext('2d');
-
 function renderMap(map, tilemapURI) {
-    //console.log(tilemapURI);
-    //canvas.width = map.length * tileSize;
-    //canvas.height = map.length * tileSize;
-    //var tileMap = phaserThis.make.tilemap({ data: map, tileWidth: tileSize, tileHeight: tileSize });
-    //var tileSet = tileMap.addTilesetImage('tile_sheet');
-    //var layer = tileMap.createDynamicLayer(0, tileSet, -8, -8);
-    //collision for player
-    //layer.setCollision(2);
-
     var tiles = [];
     //Wait for load
-    //console.log("Generating tilemap canvas...");
     map.forEach((arr, y) => {
         arr.forEach((item, x) => {
-            /*if (item === 0) {
-                //add to canvas
-                tilee = new Image();
-                tilee.src = 'resources/tile_empty.png';
-                tilee.onload = function () {
-                    context.drawImage(tilee, x * tileSize, y * tileSize);
-                }
-            }
-            else if (item === 1) {
-                //add to canvas
-                tile = new Image();
-                tile.src = 'resources/tile.png';
-                tile.onload = function () {
-                    context.drawImage(tile, x * tileSize, y * tileSize);
-                }
-            }
-            else */if (item === 2) {
-                //add to canvas
-                //tilew = new Image();
-                //tilew.src = 'resources/wall.png';
-                //tilew.onload = function () {
-                //    context.drawImage(tilew, x * tileSize, y * tileSize);
-                //}
+            if (item === 2) {
                 var tile = walls.create(x * 16, y * 16, 'empty16');
                 tiles.push(tile);
-                //define loaction of walls
+                //define location of walls
                 wallSet.add(`${x}-${y}`);
             }
         });
     });
     maskGraphics = phaserThis.add.graphics({ lineStyle: { width: 0.5, color: 0xaa00aa } });
     maskGraphics.alpha = 0.2;
-    //oof ouch my testing
-    console.log(tilemapURI);
+    //output a link to full image of generated world
+    console.log('Full image of generated world: ', tilemapURI);
     phaserThis.textures.addBase64('tilemap', tilemapURI);
     phaserThis.textures.on('onload', function () {
         var tilemap = phaserThis.add.image(0, 0, 'tilemap')
@@ -302,11 +266,9 @@ function renderMap(map, tilemapURI) {
         tilemap.x = -8;
         tilemap.y = -8;
         tilemap.depth = -2048;
+        //add the mask for the flashlight to the tilemap
         tilemap.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
     });
-    //tiles.forEach(tile => {
-    //     tile.setMask(new Phaser.Display.Masks.GeometryMask(phaserThis, maskGraphics));
-    //});
     //create the collison link
     phaserThis.physics.add.collider(player, walls);
     do {
@@ -317,8 +279,4 @@ function renderMap(map, tilemapURI) {
     player.x = (spawnPos.x * tileSize)
     player.y = (spawnPos.y * tileSize)
 
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }

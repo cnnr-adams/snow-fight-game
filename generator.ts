@@ -247,21 +247,15 @@ export default class Generator {
                         arr.forEach((item, x) => {
                             if (item === 0) {
                                 //add to canvas
-                                //tilee.onload = function () {
                                 context.drawImage(tilee, x * tileSize, y * tileSize);
-                                //}
                             }
                             else if (item === 1) {
                                 //add to canvas
-                                //tile.onload = function () {
                                 context.drawImage(tile, x * tileSize, y * tileSize);
-                                //}
                             }
                             else if (item === 2) {
                                 //add to canvas
-                                //tilew.onload = function () {
                                 context.drawImage(tilew, x * tileSize, y * tileSize);
-                                //}
                             }
                         });
                     });
@@ -273,7 +267,7 @@ export default class Generator {
         tilew.src = 'public/resources/wall.png';
 
         var tilemap = canvas.toDataURL();
-        console.log('Generating tilemap image!');
+        console.log('Generated tilemap image!');
         return tilemap;
 
     }
