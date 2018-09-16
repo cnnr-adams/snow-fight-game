@@ -8,6 +8,7 @@ enum Direction {
 export default class Generator {
     private floorPositions = new Array<Position>();
     private sober = false;
+    public tilemapImage;
     constructor(private width: number, private height: number,
         private percentFill: number, private tunnelPercent: number) { }
 
@@ -206,7 +207,7 @@ export default class Generator {
             }
         });
     }
-    createTileMap(): Array<Array<number>> {
+    createMap(): Array<Array<number>> {
         const arr: Array<Array<number>> = new Array();
         for (let x = 0; x < this.width; x++) {
             const innerArr = new Array();
@@ -225,6 +226,56 @@ export default class Generator {
             arr.push(innerArr);
         }
         return arr;
+    }
+    createTilemap(map) {
+        const tileSize = 16;
+        const Canvas = require('canvas-prebuilt');
+        const Image = Canvas.Image;
+        const canvas = new Canvas(map.length * tileSize, map.length * tileSize);
+        const context = canvas.getContext('2d'/*, { preserveDrawingBuffer: true }*/);
+
+        var tilee = new Image();
+        var tile = new Image();
+        var tilew = new Image();
+
+        //chain load tile images.
+        tilee.onload = function () {
+            tile.onload = function () {
+                tilew.onload = function () {
+
+                    map.forEach((arr, y) => {
+                        arr.forEach((item, x) => {
+                            if (item === 0) {
+                                //add to canvas
+                                //tilee.onload = function () {
+                                context.drawImage(tilee, x * tileSize, y * tileSize);
+                                //}
+                            }
+                            else if (item === 1) {
+                                //add to canvas
+                                //tile.onload = function () {
+                                context.drawImage(tile, x * tileSize, y * tileSize);
+                                //}
+                            }
+                            else if (item === 2) {
+                                //add to canvas
+                                //tilew.onload = function () {
+                                context.drawImage(tilew, x * tileSize, y * tileSize);
+                                //}
+                            }
+                        });
+                    });
+                }
+            }
+        }
+        tilee.src = 'public/resources/tile_empty.png';
+        tile.src = 'public/resources/tile.png';
+        tilew.src = 'public/resources/wall.png';
+
+        var tilemap = canvas.toDataURL();
+        console.log('Generating tilemap image!');
+        return tilemap;
+
     }
 }
 

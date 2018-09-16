@@ -243,13 +243,13 @@ var maskGraphics;
 var wallSet = new Set();
 
 //canvas for image export
-var canvas = document.getElementById('gen_canvas'),
-    context = canvas.getContext('2d');
+//var canvas = document.getElementById('gen_canvas'),
+//    context = canvas.getContext('2d');
 
-async function renderMap(map) {
-    canvas.width = map.length * tileSize;
-    canvas.height = map.length * tileSize;
-    console.log(map);
+function renderMap(map, tilemapURI) {
+    //console.log(tilemapURI);
+    //canvas.width = map.length * tileSize;
+    //canvas.height = map.length * tileSize;
     //var tileMap = phaserThis.make.tilemap({ data: map, tileWidth: tileSize, tileHeight: tileSize });
     //var tileSet = tileMap.addTilesetImage('tile_sheet');
     //var layer = tileMap.createDynamicLayer(0, tileSet, -8, -8);
@@ -258,10 +258,10 @@ async function renderMap(map) {
 
     var tiles = [];
     //Wait for load
-    console.log("Generating tilemap canvas...");
+    //console.log("Generating tilemap canvas...");
     map.forEach((arr, y) => {
         arr.forEach((item, x) => {
-            if (item === 0) {
+            /*if (item === 0) {
                 //add to canvas
                 tilee = new Image();
                 tilee.src = 'resources/tile_empty.png';
@@ -277,13 +277,13 @@ async function renderMap(map) {
                     context.drawImage(tile, x * tileSize, y * tileSize);
                 }
             }
-            else if (item === 2) {
+            else */if (item === 2) {
                 //add to canvas
-                tilew = new Image();
-                tilew.src = 'resources/wall.png';
-                tilew.onload = function () {
-                    context.drawImage(tilew, x * tileSize, y * tileSize);
-                }
+                //tilew = new Image();
+                //tilew.src = 'resources/wall.png';
+                //tilew.onload = function () {
+                //    context.drawImage(tilew, x * tileSize, y * tileSize);
+                //}
                 var tile = walls.create(x * 16, y * 16, 'empty16');
                 tiles.push(tile);
                 //define loaction of walls
@@ -294,8 +294,6 @@ async function renderMap(map) {
     maskGraphics = phaserThis.add.graphics({ lineStyle: { width: 0.5, color: 0xaa00aa } });
     maskGraphics.alpha = 0.2;
     //oof ouch my testing
-    await sleep(500);
-    var tilemapURI = canvas.toDataURL();
     console.log(tilemapURI);
     phaserThis.textures.addBase64('tilemap', tilemapURI);
     phaserThis.textures.on('onload', function () {

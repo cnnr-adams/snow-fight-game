@@ -11,8 +11,11 @@ import Generator from './generator';
 console.log("Generating map...");
 const generator = new Generator(25, 25, 20, 20);
 generator.generate();
-console.log("Map generated, generating simple tilemap..");
-const map = generator.createTileMap();
+console.log("Map generated, generating simple tilemap array...");
+const map = generator.createMap();
+console.log("Tilemap array generated, creating tilemap image...");
+const tilemap = generator.createTilemap(map);
+console.log("World generation completed");
 
 server.listen(port, () => {
     console.log(`Listening on port ${port}`);
@@ -29,7 +32,7 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('player', socket.id, x, y, rot);
     });
     socket.on('map', (callback) => {
-        callback(map);
+        callback(map, tilemap);
     });
     socket.on('disconnect', function () {
         socket.broadcast.emit('playerleave', socket.id);
