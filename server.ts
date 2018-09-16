@@ -31,6 +31,9 @@ io.on('connection', function (socket) {
     socket.on('player', (x, y, rot) => {
         socket.broadcast.emit('player', socket.id, x, y, rot);
     });
+    socket.on('flashlight', function (polygon) {
+        socket.broadcast.emit('flashlight', socket.id, polygon);
+    })
     socket.on('map', (callback) => {
         callback(map, tilemap);
     });

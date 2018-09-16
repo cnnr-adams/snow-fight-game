@@ -43,6 +43,7 @@ var lightAngle = Math.PI / 4;
 var numberOfRays = 100;
 var rayLength = 100;
 var otherPlayers = new Map();
+var flashlightPolygons = new Map();
 function create() {
     console.log("CREATE!");
     phaserThis = this;
@@ -75,6 +76,13 @@ function create() {
             otherPlayer.image.destroy();
             otherPlayers.delete(id);
         }
+        const otherFlashlight = flashlightPolygons.get(id);
+        if (otherFlashlight) {
+            flashlightPolygons.delete(id);
+        }
+    });
+    socket.on('flashlight', function (id, polygon) {
+        flashlightPolygons.set(id, polygon);
     });
 }
 var interpSpeed;
@@ -229,6 +237,13 @@ function update(time, delta) {
         var polygon = new Phaser.Geom.Polygon(points);
         maskGraphics.fillStyle(0xffffe0);
         maskGraphics.fillPoints(polygon.points, true);
+        socket.emit('flashlight', points);
+        flashlightPolygons.forEach(p => {
+            var pg = new Phaser.Geom.Polygon(p);
+            maskGraphics.fillStyle(0xffffe0);
+            maskGraphics.fillPoints(pg.points, true);
+        });
+
     }
 }
 
